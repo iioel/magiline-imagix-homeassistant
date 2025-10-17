@@ -1,0 +1,13 @@
+{
+  "domain": "magiline_imagix",
+  "name": "Magiline iMAGI-X Pool",
+  "codeowners": ["@iioel"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/iioel/magiline-imagix-homeassistant",
+  "issue_tracker": "https://github.com/iioel/magiline-imagix-homeassistant/issues",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "requirements": [],
+  "version": "1.0.0"
+}

@@ -1,0 +1,21 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Magiline iMAGI-X Pool Setup",
+        "description": "Enter your pool's IP address and API path",
+        "data": {
+          "host": "IP Address (e.g., 192.168.1.52:11000)",
+          "path": "API Path (default: /api/v1/pool/info)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the pool. Please check the IP address and ensure the pool API is accessible.",
+      "unknown": "Unexpected error occurred"
+    },
+    "abort": {
+      "already_configured": "This pool is already configured"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Magiline iMAGI-X Configuration de la piscine",
+        "description": "Entrez l'adresse IP de votre piscine et le PATH de l'API",
+        "data": {
+          "host": "Adresse IP (par exemple, 192.168.1.52:11000)",
+          "path": "PATH de l'API (par défaut: /api/v1/pool/info)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Échec de la connexion à la piscine. Veuillez vérifier l'adresse IP et vous assurer que l'API de la piscine est accessible.",
+      "unknown": "Une erreur inattendue s'est produite"
+    },
+    "abort": {
+      "already_configured": "Cette piscine est déjà configurée"
+    }
+  }
+}
