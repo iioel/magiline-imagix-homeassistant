@@ -10,7 +10,7 @@ import aiohttp
 import async_timeout
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
+from homeassistant.const import CONF_HOST, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -20,16 +20,27 @@ from homeassistant.helpers.update_coordinator import (
     UpdateFailed,
 )
 
+from .const import DOMAIN, CONF_PATH, DEFAULT_PATH, CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "magiline_imagix"
 PLATFORMS: list[Platform] = [Platform.SENSOR]
-SCAN_INTERVAL = timedelta(seconds=30)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Pool Monitor from a config entry."""
-    coordinator = PoolDataUpdateCoordinator(hass, entry)
+    # Get configuration from options (preferred) or data (fallback)
+    host = entry.options.get(CONF_HOST, entry.data.get(CONF_HOST))
+    path = entry.options.get(CONF_PATH, entry.data.get(CONF_PATH, DEFAULT_PATH))
+    scan_interval_seconds = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+    
+    coordinator = PoolDataUpdateCoordinator(
+        hass,
+        entry,
+        host=host,
+        path=path,
+        scan_interval=timedelta(seconds=scan_interval_seconds),
+    )
     
     # Fetch initial data
     await coordinator.async_config_entry_first_refresh()
@@ -39,6 +50,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Setup platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    # Register update listener for options changes
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
     return True
 
@@ -53,20 +67,32 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return unload_ok
 
 
+async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Reload the config entry when options change."""
+    await hass.config_entries.async_reload(entry.entry_id)
+
+
 class PoolDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching Pool data from the API."""
 
-    def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        host: str,
+        path: str,
+        scan_interval: timedelta,
+    ) -> None:
         """Initialize."""
-        self.host = entry.data["host"]
-        self.path = entry.data.get("path", "/api/v1/pool/info")
+        self.host = host
+        self.path = path
         self.session = async_get_clientsession(hass)
         
         super().__init__(
             hass,
             _LOGGER,
             name=f"{DOMAIN}_{entry.entry_id}",
-            update_interval=SCAN_INTERVAL,
+            update_interval=scan_interval,
         )
 
     async def _async_update_data(self) -> dict[str, Any]:

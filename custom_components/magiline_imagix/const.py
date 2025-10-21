@@ -12,6 +12,9 @@ DOMAIN = "magiline_imagix"
 CONF_PATH = "path"
 DEFAULT_PATH = "/api/v1/pool/info"
 
+CONF_SCAN_INTERVAL = "scan_interval"
+DEFAULT_SCAN_INTERVAL = 30  # seconds
+
 # Comprehensive sensor definitions
 SENSOR_DEFINITIONS = [
     # Pump Sensors (from state.cards.pumps[0])

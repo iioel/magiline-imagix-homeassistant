@@ -12,10 +12,29 @@
     },
     "error": {
       "cannot_connect": "Échec de la connexion à la piscine. Veuillez vérifier l'adresse IP et vous assurer que l'API de la piscine est accessible.",
-      "unknown": "Une erreur inattendue s'est produite"
+      "unknown": "Une erreur inattendue s'est produite",
+      "invalid_scan_interval": "L'intervalle de scrutation doit être entre 5 et 300 secondes"
     },
     "abort": {
       "already_configured": "Cette piscine est déjà configurée"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configurer la piscine Magiline iMAGI-X",
+        "description": "Mettre à jour la configuration de votre piscine",
+        "data": {
+          "host": "Adresse IP",
+          "path": "PATH de l'API",
+          "scan_interval": "Intervalle de scrutation (secondes)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Échec de la connexion à la piscine avec ces paramètres. Veuillez vérifier l'adresse IP et le chemin.",
+      "unknown": "Une erreur inattendue s'est produite",
+      "invalid_scan_interval": "L'intervalle de scrutation doit être entre 5 et 300 secondes"
     }
   }
 }
