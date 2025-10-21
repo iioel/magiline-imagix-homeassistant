@@ -12,10 +12,29 @@
     },
     "error": {
       "cannot_connect": "Failed to connect to the pool. Please check the IP address and ensure the pool API is accessible.",
-      "unknown": "Unexpected error occurred"
+      "unknown": "Unexpected error occurred",
+      "invalid_scan_interval": "Scan interval must be between 5 and 300 seconds"
     },
     "abort": {
       "already_configured": "This pool is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure Magiline iMAGI-X Pool",
+        "description": "Update your pool's configuration",
+        "data": {
+          "host": "IP Address",
+          "path": "API Path",
+          "scan_interval": "Scan Interval (seconds)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the pool with these settings. Please check the IP address and path.",
+      "unknown": "Unexpected error occurred",
+      "invalid_scan_interval": "Scan interval must be between 5 and 300 seconds"
     }
   }
 }

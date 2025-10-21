@@ -11,13 +11,11 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-DOMAIN = "magiline_imagix"
-CONF_PATH = "path"
-DEFAULT_PATH = "/api/v1/pool/info"
+from .const import DOMAIN, CONF_PATH, DEFAULT_PATH, CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -84,6 +82,78 @@ class PoolMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
+            data_schema=data_schema,
+            errors=errors,
+        )
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> PoolMonitorOptionsFlowHandler:
+        """Get the options flow for this handler."""
+        return PoolMonitorOptionsFlowHandler(config_entry)
+
+
+class PoolMonitorOptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle options for the Pool Monitor integration."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage the options."""
+        errors: dict[str, str] = {}
+
+        # Get current values: prefer options, fall back to data
+        current_host = self.config_entry.options.get(
+            CONF_HOST, self.config_entry.data.get(CONF_HOST)
+        )
+        current_path = self.config_entry.options.get(
+            CONF_PATH, self.config_entry.data.get(CONF_PATH, DEFAULT_PATH)
+        )
+        current_scan_interval = self.config_entry.options.get(
+            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+        )
+
+        if user_input is not None:
+            # Validate scan interval is positive
+            if user_input.get(CONF_SCAN_INTERVAL, 0) <= 0:
+                errors["base"] = "invalid_scan_interval"
+            else:
+                # Validate connection to the new host/path before saving
+                try:
+                    await validate_input(
+                        self.hass,
+                        {
+                            CONF_HOST: user_input.get(CONF_HOST, current_host),
+                            CONF_PATH: user_input.get(CONF_PATH, current_path),
+                        },
+                    )
+                except CannotConnect:
+                    errors["base"] = "cannot_connect"
+                except Exception:  # pylint: disable=broad-except
+                    _LOGGER.exception("Unexpected error validating options")
+                    errors["base"] = "unknown"
+                else:
+                    # Save options
+                    return self.async_create_entry(title="", data=user_input)
+
+        data_schema = vol.Schema(
+            {
+                vol.Required(CONF_HOST, default=current_host): str,
+                vol.Optional(CONF_PATH, default=current_path): str,
+                vol.Optional(
+                    CONF_SCAN_INTERVAL, default=current_scan_interval
+                ): vol.All(vol.Coerce(int), vol.Range(min=5, max=300)),
+            }
+        )
+
+        return self.async_show_form(
+            step_id="init",
             data_schema=data_schema,
             errors=errors,
         )
