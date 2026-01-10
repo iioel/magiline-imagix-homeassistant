@@ -92,7 +92,7 @@ class PoolMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> PoolMonitorOptionsFlowHandler:
         """Get the options flow for this handler."""
-        return PoolMonitorOptionsFlowHandler(config_entry)
+        return PoolMonitorOptionsFlowHandler()
 
 
 class PoolMonitorOptionsFlowHandler(config_entries.OptionsFlow):
