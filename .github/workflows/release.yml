@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get version from manifest
+        id: version
+        run: |
+          VERSION=$(jq -r '.version' custom_components/magiline_imagix/manifest.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create ZIP archive
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          cd custom_components
+          zip -r ../magiline_imagix.zip magiline_imagix/
+          cd ..
+
+      - name: Create release
+        if: steps.check_tag.outputs.exists == 'false'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --title "Release ${{ steps.version.outputs.tag }}" \
+            --notes "## Magiline iMAGI-X Pool Integration ${{ steps.version.outputs.tag }}
+
+          Automatic release created from manifest version ${{ steps.version.outputs.version }}.
+
+          ### Installation
+
+          #### Via HACS (Recommended)
+          1. Add this repository as a custom repository in HACS
+          2. Search for \"Magiline iMAGI-X Pool\"
+          3. Click \"Download\"
+          4. Restart Home Assistant
+
+          #### Manual Installation
+          1. Download \`magiline_imagix.zip\` from the assets below
+          2. Extract to your \`custom_components\` directory
+          3. Restart Home Assistant
+
+          ### Changelog
+
+          See commit history for changes since last release." \
+            magiline_imagix.zip
