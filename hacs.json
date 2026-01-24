@@ -1,5 +1,6 @@
 {
   "name": "Magiline iMAGI-X Pool",
   "hacs": "2.0.5",
-  "homeassistant": "2025.10.2"
+  "homeassistant": "2025.10.2",
+  "render_readme": true
 }
